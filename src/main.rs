@@ -1,4 +1,5 @@
 use std::error::Error;
+use std::fmt;
 use std::fs;
 use std::path::PathBuf;
 
@@ -12,6 +13,20 @@ struct SimplifiedDesktopEntry {
     comment: String,
     exec: String,
     terminal: bool,
+}
+
+impl fmt::Display for SimplifiedDesktopEntry {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "{}\t{}\t{}\t{}\t{}",
+            self.path.to_string_lossy(),
+            self.name,
+            self.comment,
+            self.exec,
+            self.terminal
+        )
+    }
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -61,14 +76,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
     }
     for sde in sdes {
-        println!(
-            "{}\t{}\t{}\t{}\t{}",
-            sde.path.to_string_lossy(),
-            sde.name,
-            sde.comment,
-            sde.exec,
-            sde.terminal
-        );
+        println!("{}", sde);
     }
     if total_failed > 0 {
         eprintln!("Failed parsing {} desktop files", total_failed);
