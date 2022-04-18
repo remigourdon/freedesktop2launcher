@@ -1,9 +1,8 @@
 use std::error::Error;
 use std::fs;
-use std::path::{Path, PathBuf};
-use std::{io, io::prelude::*};
+use std::path::PathBuf;
 
-use freedesktop_desktop_entry::DesktopEntry;
+use freedesktop_desktop_entry::{default_paths, DesktopEntry, Iter};
 
 #[derive(Debug)]
 #[allow(dead_code)]
@@ -18,10 +17,8 @@ struct SimplifiedDesktopEntry {
 fn main() -> Result<(), Box<dyn Error>> {
     let mut total_failed = 0;
     let mut sdes = vec![];
-    for line in io::stdin().lock().lines() {
-        let line = line?;
-        let path = Path::new(&line);
-        if let Ok(bytes) = fs::read_to_string(path) {
+    for path in Iter::new(default_paths()) {
+        if let Ok(bytes) = fs::read_to_string(&path) {
             if let Ok(entry) = DesktopEntry::decode(&path, &bytes) {
                 let path = entry.path.to_path_buf();
                 let name = entry.name(Some("en")).unwrap().to_string();
@@ -73,6 +70,8 @@ fn main() -> Result<(), Box<dyn Error>> {
             sde.terminal
         );
     }
-    eprintln!("Failed parsing {} desktop files", total_failed);
+    if total_failed > 0 {
+        eprintln!("Failed parsing {} desktop files", total_failed);
+    }
     Ok(())
 }
